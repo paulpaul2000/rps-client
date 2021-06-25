@@ -1,26 +1,27 @@
 <template>
-  <div class="app">
-    <div class="center-container">
-      <select class="margin-10 device-select" v-model="audioDevice">
-        <option v-for="device, id in audioDevices" :key="id" :value="device.deviceId">
-          {{ device.label }}
-        </option>
-      </select>
-      <table class="margin-10">
-        <tr class="top-row" v-if="topPrediction != null">
-          <td>{{ topPrediction.name }}</td>
-          <td>{{ topPrediction.score }} %</td>
-        </tr>
-        <tr v-else>
-          <td>Not sure...</td>
-        </tr>
-        <tr class="other-rows" v-for="(prediction, index) in filteredSortedPredictions" v-bind:key="index">
-          <td>{{prediction.name}}</td>
-          <td>{{prediction.score}} %</td>
-        </tr>
-      </table>
-    </div>
-  </div>
+  <v-card-text>
+    <v-select
+      :items="audioDevices"
+      v-model="audioDevice"
+      item-text="label"
+      item-value="deviceId"
+    />
+    <v-simple-table>
+      <tbody>
+      <tr v-if="topPrediction != null">
+        <td>{{ topPrediction.name }}</td>
+        <td>{{ topPrediction.score }} %</td>
+      </tr>
+      <tr v-else>
+        <td>Not sure...</td>
+      </tr>
+      <tr v-for="(prediction, index) in filteredSortedPredictions" v-bind:key="index">
+        <td>{{prediction.name}}</td>
+        <td>{{prediction.score}} %</td>
+      </tr>
+      </tbody>
+    </v-simple-table>
+  </v-card-text>
 </template>
 
 <script>

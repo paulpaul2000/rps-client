@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <v-card style="width: 60%" class="mx-auto">
         <div v-if="screen == 'idle'">
             <idle />
         </div>
@@ -9,7 +9,7 @@
         <div v-else-if="screen == 'result'">
             <result/>
         </div>
-    </div>
+    </v-card>
 </template>
 
 <script>
@@ -33,11 +33,4 @@ export default {
 </script>
 
 <style scoped>
-span {
-  margin: 10px;
-}
-
-li:hover {
-  background-color: rgba(200,50,50,0.8);
-}
 </style>

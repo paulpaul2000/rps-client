@@ -1,42 +1,30 @@
 <template>
-  <div id="app">
-    <div id="center-container">
-      <select
-        id="camera-select"
-        v-model="videoDevice"
-        @change="initWebcamStream()"
-      >
-        <option
-          v-for="device in devices"
-          v-bind:key="device.deviceId"
-          v-bind:value="device.deviceId"
-        >
-          {{ device.label }}
-        </option>
-      </select>
-      <div id="result-frame">
-        <video ref="video"></video>
-      </div>
-      <div class="table-container">
-        <table class="table">
-          <tr v-for="(prediction, index) in predictions" v-bind:key="index">
-            <td>
-              <label :for="prediction.name">{{ prediction.name }}</label>
-            </td>
-            <td>
-              <meter
-                class="score"
-                :id="prediction.name"
-                :value="prediction.score"
-                min="0"
-                max="100"
-              />
-            </td>
-          </tr>
-        </table>
-      </div>
+  <v-card-text>
+    <v-select
+      :items="devices"
+      v-model="videoDevice"
+      item-text="label"
+      item-value="deviceId"
+    />
+    <video ref="video"></video>
+    <div>
+      <table>
+        <tr v-for="(prediction, index) in predictions" v-bind:key="index">
+          <td>
+            <label :for="prediction.name">{{ prediction.name }}</label>
+          </td>
+          <td>
+            <meter
+              :id="prediction.name"
+              :value="prediction.score"
+              min="0"
+              max="100"
+            />
+          </td>
+        </tr>
+      </table>
     </div>
-  </div>
+  </v-card-text>
 </template>
 
 <script>
@@ -49,12 +37,14 @@ export default {
   data() {
     return {
       videoDevice: "",
-      resultWidth: 0,
-      resultHeight: 0,
       devices: [],
       baseModel: "mobilenet_v2",
       isModelReady: false,
-      predictions: [],
+      predictions: [
+        { name: 'Rock', score: 0 },
+        { name: 'Paper', score: 0 },
+        { name: 'Scissors', score: 0 }
+      ],
       lastPrediction: "",
     };
   },
@@ -82,6 +72,10 @@ export default {
       let video = this.$refs.video
       video.pause()
       video.srcObject = null
+      
+      this.stream.getTracks().forEach(track => {
+        track.stop()
+      })
 
       this.isVideoStreamReady = false
       cancelAnimationFrame(this.raf)
@@ -103,18 +97,16 @@ export default {
               video: { deviceId: this.videoDevice },
             })
             .then((stream) => {
+              this.stream = stream
               // set <video> source as the webcam input
               let video = this.$refs.video
-              video.srcObject = stream;
+              video.srcObject = this.stream;
               return new Promise((resolve) => {
                 // when video is loaded
                 video.onloadedmetadata = () => {
                   // calculate the video ratio
                   this.videoRatio = video.videoHeight / video.videoWidth;
                   // add event listener on resize to reset the <video> and <canvas> sizes
-                  window.addEventListener("resize", this.setResultSize);
-                  // set the initial size
-                  this.setResultSize();
                   this.isVideoStreamReady = true;
                   video.play()
                   resolve();
@@ -127,15 +119,6 @@ export default {
             })
         );
       }
-    },
-
-    setResultSize() {
-      let clientWidth = document.documentElement.clientWidth;
-      this.resultWidth = Math.min(600, clientWidth);
-      this.resultHeight = this.resultWidth * this.videoRatio;
-      let video = this.$refs.video;
-      video.width = this.resultWidth;
-      video.height = this.resultHeight;
     },
 
     loadModel() {
@@ -197,7 +180,7 @@ export default {
           if (this.lastPrediction != 'Nothing') {
             this.$emit('gesture', this.lastPrediction.toLowerCase())
           }
-        }, 500)
+        }, 1500)
       }
     },
   },
@@ -205,30 +188,7 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-#result-frame {
-  height: 500px;
-}
-
-.table-container {
-  width: 50%;
-  margin: 0 auto;
-}
-
-#center-container {
-  width: 600px;
-  margin: 0 auto;
-}
-
-#camera-select {
-  width: 300px;
-  margin-bottom: 50px;
+video {
+  width: 100%;
 }
 </style>
