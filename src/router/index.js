@@ -1,32 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
-import Screen1 from '../views/Screen1'
-import Screen2 from '../views/Screen2'
-import Screen3 from '../views/Screen3'
+import Game from '../views/Game.vue'
+import Login from '../views/Login.vue'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
 const routes = [
     {
-        path: '/',
-        name: 'home',
-        component: Screen1
+        path: '/login',
+        name: 'login',
+        component: Login
     },
     {
-        path: '/screen1',
-        name: 'screen1',
-        component: Screen1
-    },
-    {
-        path: '/screen2',
-        name: 'screen2',
-        component: Screen2
-    },
-    {
-        path: '/screen3',
-        name: 'screen3',
-        component: Screen3
+        path: '/game',
+        name: 'game',
+        component: Game
     }
 ]
 
@@ -34,6 +23,17 @@ const router = new VueRouter({
     mode: 'history',
     base: process.env.BASE_URL,
     routes
+})
+
+router.beforeEach((to, from, next) => {
+    if (store.getters.loggedIn && to.name == 'login') {
+        next('game')
+    } else if (! store.getters.loggedIn && to.name != 'login') {
+        next('login')
+    }
+    else {
+        next()
+    }
 })
 
 export default router
